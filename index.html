@@ -662,11 +662,37 @@
   })();
 </script>
 <script>
+let selectedRating = 0;
+
+// ⭐ Star rating
+document.querySelectorAll(".star-btn").forEach(function (star) {
+    star.addEventListener("click", function () {
+
+        selectedRating = this.getAttribute("data-val");
+
+        // Stars fill करना
+        document.querySelectorAll(".star-btn").forEach(function (s) {
+            if (parseInt(s.getAttribute("data-val")) <= parseInt(selectedRating)) {
+                s.classList.add("filled");
+            } else {
+                s.classList.remove("filled");
+            }
+        });
+    });
+});
+
+
+// 📩 Send feedback
 document.getElementById("fbSendBtn").addEventListener("click", async function () {
 
     const name = document.getElementById("fbName").value.trim();
     const email = document.getElementById("fbEmail").value.trim();
     const message = document.getElementById("fbText").value.trim();
+
+    if (!selectedRating) {
+        alert("Please select a star rating.");
+        return;
+    }
 
     if (!name || !message) {
         alert("Please enter your name and feedback.");
@@ -677,11 +703,14 @@ document.getElementById("fbSendBtn").addEventListener("click", async function ()
 
     data.append("access_key", "e08c56ab-a942-4d29-be42-9e70bd1e4744");
     data.append("subject", "New Feedback - New Balaji Footwear");
+
     data.append("name", name);
     data.append("email", email);
+    data.append("rating", selectedRating + " / 5 Stars");
     data.append("message", message);
 
     try {
+
         const response = await fetch("https://api.web3forms.com/submit", {
             method: "POST",
             body: data
@@ -690,17 +719,29 @@ document.getElementById("fbSendBtn").addEventListener("click", async function ()
         const result = await response.json();
 
         if (result.success) {
+
             alert("Thank you! Your feedback has been sent.");
-            
+
             document.getElementById("fbName").value = "";
             document.getElementById("fbEmail").value = "";
             document.getElementById("fbText").value = "";
+
+            selectedRating = 0;
+
+            document.querySelectorAll(".star-btn").forEach(function (s) {
+                s.classList.remove("filled");
+            });
+
         } else {
+
             alert("Something went wrong. Please try again.");
+
         }
 
     } catch (error) {
+
         alert("Unable to send feedback. Please try again.");
+
     }
 });
 </script>
